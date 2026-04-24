@@ -149,6 +149,64 @@ li.task:hover .del { opacity: 1; }
 }
 .btn-add:hover { background: rgba(184, 145, 107, 0.1); border-style: solid; }
 
+/* priority marker */
+.task .prio {
+  width: 3px; height: 16px; margin-right: -4px;
+  cursor: pointer; transition: all 120ms;
+  align-self: center; border-radius: 1px;
+}
+.task .prio[data-p="0"] { background: var(--bruised); box-shadow: 0 0 4px rgba(140,59,59,0.5); }
+.task .prio[data-p="1"] { background: var(--brass-dim); }
+.task .prio[data-p="2"] { background: var(--paper-dim); opacity: 0.5; }
+.task .prio:hover { transform: scaleX(2); }
+
+/* deadline badge */
+.task .deadline {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  color: var(--paper); padding: 2px 6px; border: 1px dashed var(--hairline);
+  cursor: pointer; user-select: none; white-space: nowrap;
+  transition: all 120ms;
+}
+.task .deadline:hover { border-color: var(--brass-dim); color: var(--brass); }
+.task .deadline.soon   { color: var(--brass); border-color: var(--brass-dim); }
+.task .deadline.today  { color: var(--brass-hi); border-color: var(--brass); font-weight: 500; }
+.task .deadline.overdue{ color: var(--bruised); border-color: var(--bruised); background: rgba(140,59,59,0.08); }
+.task .deadline.empty  { opacity: 0.25; border-style: dotted; }
+li.task:hover .deadline.empty { opacity: 1; }
+
+/* updated task grid with prio + deadline slots */
+ul.tasks li.task {
+  grid-template-columns: 6px 26px 1fr auto auto 20px;
+}
+
+/* search */
+.search-row {
+  display: flex; gap: 12px; align-items: center;
+  margin-bottom: 14px; padding-bottom: 14px;
+  border-bottom: 1px dashed var(--hairline);
+}
+.search-input {
+  flex: 1; background: var(--surface-2); border: 1px solid var(--hairline);
+  color: var(--bone); padding: 8px 12px; font-family: var(--serif);
+  font-size: 14px; outline: none;
+}
+.search-input:focus { border-color: var(--brass-dim); }
+.search-input::placeholder { color: var(--paper-dim); font-style: italic; }
+.search-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.search-chip {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  padding: 4px 10px; border: 1px dashed var(--hairline); cursor: pointer;
+  color: var(--paper-dim); text-transform: lowercase; transition: all 120ms;
+  user-select: none;
+}
+.search-chip:hover { border-color: var(--brass-dim); color: var(--paper); }
+.search-chip.active { border-color: var(--brass); color: var(--brass); border-style: solid; }
+.search-chip[data-kind="code"].active   { border-color: #7f96b5; color: #7f96b5; }
+.search-chip[data-kind="script"].active { border-color: var(--brass); color: var(--brass); }
+.search-chip[data-kind="render"].active { border-color: #a88080; color: #a88080; }
+.search-chip[data-kind="audio"].active  { border-color: #8aa580; color: #8aa580; }
+.search-chip[data-kind="ui"].active     { border-color: #a07fa8; color: #a07fa8; }
+
 /* stat panel */
 .panel { border: 1px solid var(--hairline); padding: 24px 22px 20px; background: linear-gradient(180deg, var(--surface) 0%, transparent 100%); }
 .stat { margin-bottom: 18px; }
@@ -188,6 +246,8 @@ li.task:hover .del { opacity: 1; }
 .tier-bar .fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--brass-dim), var(--brass) 70%, var(--brass-hi)); transition: width 500ms ease-out; }
 .tier-xp-text { font-family: var(--mono); font-size: 10px; color: var(--paper); display: flex; justify-content: space-between; }
 .tier-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--hairline); }
+.tier-stats-bottom { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+.tier-stats-bottom .tier-stat-value.streak-live { color: var(--brass); }
 .tier-stat-label { font-family: var(--label); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--paper-dim); }
 .tier-stat-value { font-family: var(--display); font-size: 22px; color: var(--bone); margin-top: 2px; }
 
@@ -315,6 +375,10 @@ footer .actions a.danger:hover { color: var(--bruised); }
         <span id="sprintRange">—</span>
         <span class="edit-mini" id="editDates">[edit dates]</span>
       </div>
+      <div class="search-row">
+        <input class="search-input" id="searchInput" type="search" placeholder="search…">
+        <div class="search-chips" id="searchChips"></div>
+      </div>
       <ul class="tasks" id="taskList"></ul>
       <div class="add-row"><button class="btn-add" id="addTaskBtn" data-i18n="addTask">+ add task</button></div>
     </div>
@@ -368,6 +432,16 @@ footer .actions a.danger:hover { color: var(--bruised); }
           <div class="tier-stat-value" id="statAch">0/0</div>
         </div>
       </div>
+      <div class="tier-stats-bottom">
+        <div>
+          <div class="tier-stat-label" data-i18n="streak">Streak</div>
+          <div class="tier-stat-value streak-live" id="statStreak">0</div>
+        </div>
+        <div>
+          <div class="tier-stat-label" data-i18n="xpToday">XP today</div>
+          <div class="tier-stat-value" id="statXpToday">0</div>
+        </div>
+      </div>
     </div>
     <div>
       <div class="ach-grid" id="achGrid"></div>
@@ -402,7 +476,7 @@ footer .actions a.danger:hover { color: var(--bruised); }
 </section>
 
 <footer>
-  <div class="left" id="footerLeft">VELVET SILENCE · ledger v3.0 · click any text to edit</div>
+  <div class="left" id="footerLeft">VELVET SILENCE · ledger v4.0 · click any text to edit</div>
   <div class="actions">
     <a id="exportBtn" data-i18n="exportData">export json</a>
     <a id="importBtn" data-i18n="importData">import json</a>
@@ -427,7 +501,7 @@ const I18N = {
     progress: "Progress", wip: "Fatigue · WIP", lastCommit: "Last commit",
     addTask: "+ add task", addMilestone: "+ add milestone", addItem: "+ add item",
     exportData: "export json", importData: "import json", resetAll: "reset to defaults",
-    editDates: "[edit dates]", footerLeft: "VELVET SILENCE · ledger v3.0 · click any text to edit",
+    editDates: "[edit dates]", footerLeft: "VELVET SILENCE · ledger v4.0 · click any text to edit",
     endsIn: "ends in", overdue: "overdue", endsToday: "ends today", day: "day", days: "days",
     newTask: "New task", newItem: "New item", newMilestoneAct: "Act N", newMilestoneName: "Milestone name",
     confirmReset: "Reset ALL data to defaults? This cannot be undone (unless you exported a backup).",
@@ -436,6 +510,12 @@ const I18N = {
     ascent: "The Ascent", tierLabel: "Current Tier",
     marksToNext: "Marks to next tier", totalMarks: "Total marks", tasksDone: "Tasks done", achUnlocked: "Achievements",
     toastAchUnlocked: "Achievement unlocked", toastTierUp: "Tier ascended",
+    streak: "Streak", xpToday: "XP today",
+    searchPlaceholder: "search tasks…",
+    setPriority: "Set priority (0=high, 1=normal, 2=low):",
+    setDeadline: "Deadline (YYYY-MM-DD or empty to clear):",
+    deadlineToday: "today", deadlineOverdue: "overdue",
+    day1: "day", days2: "days",
   },
   ru: {
     titleSuffix: "Производственный журнал", subhead: "Velvet Silence · соло-разработчик · Ren'Py + VaM · RU/EN",
@@ -446,7 +526,7 @@ const I18N = {
     progress: "Прогресс", wip: "Усталость · В работе", lastCommit: "Последний коммит",
     addTask: "+ добавить задачу", addMilestone: "+ добавить веху", addItem: "+ добавить пункт",
     exportData: "экспорт json", importData: "импорт json", resetAll: "сбросить к дефолту",
-    editDates: "[изм. даты]", footerLeft: "VELVET SILENCE · журнал v3.0 · кликни любой текст чтобы редактировать",
+    editDates: "[изм. даты]", footerLeft: "VELVET SILENCE · журнал v4.0 · кликни любой текст чтобы редактировать",
     endsIn: "до конца", overdue: "просрочено", endsToday: "заканчивается сегодня", day: "день", days: "дн.",
     newTask: "Новая задача", newItem: "Новый пункт", newMilestoneAct: "Акт N", newMilestoneName: "Название вехи",
     confirmReset: "Сбросить ВСЕ данные к заводским? Отмена невозможна (если не экспортировал бэкап).",
@@ -455,6 +535,12 @@ const I18N = {
     ascent: "Восхождение", tierLabel: "Текущий ранг",
     marksToNext: "Меток до следующего ранга", totalMarks: "Всего меток", tasksDone: "Задач закрыто", achUnlocked: "Достижения",
     toastAchUnlocked: "Достижение разблокировано", toastTierUp: "Ранг повышен",
+    streak: "Серия", xpToday: "XP сегодня",
+    searchPlaceholder: "поиск задач…",
+    setPriority: "Приоритет (0=высокий, 1=обычный, 2=низкий):",
+    setDeadline: "Дедлайн (ГГГГ-ММ-ДД или пусто чтобы очистить):",
+    deadlineToday: "сегодня", deadlineOverdue: "просрочен",
+    day1: "день", days2: "дн.",
   },
 };
 
@@ -487,6 +573,10 @@ const ACHIEVEMENTS = [
   { id: "mile_first",   symbol: "◐", xp: 15, name: { en: "Ascendant",        ru: "Восходящий"         }, desc: { en: "Any milestone past 50% progress.",                           ru: "Любая веха перешла за 50% прогресса." }, check: (s) => s.milestones.some(m => m.total > 0 && m.done / m.total >= 0.5) },
   { id: "mile_complete",symbol: "●", xp: 50, name: { en: "First Complete",   ru: "Первое Завершение"  }, desc: { en: "Complete a milestone (done == total).",                       ru: "Закрой веху (done == total)." }, check: (s) => s.milestones.some(m => m.total > 0 && m.done >= m.total) },
   { id: "worldsmith",   symbol: "✧", xp: 40, name: { en: "Worldsmith",       ru: "Миростроитель"      }, desc: { en: "Start progress on every milestone.",                         ru: "Начать работу над каждой вехой." }, check: (s) => s.milestones.length > 0 && s.milestones.every(m => m.done > 0) },
+  { id: "streak_3",     symbol: "◎", xp: 15, name: { en: "Three Suns",       ru: "Три Солнца"         }, desc: { en: "Close a task 3 days in a row.",                              ru: "Закрывай задачи 3 дня подряд." }, check: (s) => s.streak >= 3 },
+  { id: "streak_7",     symbol: "☀", xp: 40, name: { en: "Seven-Day Vigil",  ru: "Семидневная Вахта"  }, desc: { en: "Close a task 7 days in a row.",                              ru: "Закрывай задачи 7 дней подряд." }, check: (s) => s.streak >= 7 },
+  { id: "early_bird",   symbol: "✹", xp: 10, name: { en: "Early Bird",       ru: "Ранняя Пташка"      }, desc: { en: "Close a task before 9 AM.",                                  ru: "Закрой задачу до 9 утра." }, check: (s) => s.completedLog.some(e => new Date(e.doneAt).getHours() < 9) },
+  { id: "night_owl",    symbol: "☾", xp: 10, name: { en: "Night Owl",        ru: "Ночная Сова"        }, desc: { en: "Close a task after midnight.",                               ru: "Закрой задачу после полуночи." }, check: (s) => s.completedLog.some(e => { const h = new Date(e.doneAt).getHours(); return h >= 0 && h < 4; }) },
 ];
 
 // ============ DEFAULT DATA ============
@@ -521,19 +611,29 @@ const DEFAULT_DATA = {
     ],
   },
   lastCommit: "—",
-  rpg: { xp: 0, totalDone: 0, unlocked: [], sprintsFinished: 0 },
+  rpg: { xp: 0, totalDone: 0, unlocked: [], sprintsFinished: 0, streak: 0, lastDoneDate: null, completedLog: [] },
 };
 
 // ============ STATE ============
 const KEY_DATA = "mentalist_planner_data_v3";
 const KEY_LANG = "mentalist_planner_lang";
 let DATA, LANG;
+const SEARCH = { query: "", kinds: new Set() };
 
 function loadState() {
   const saved = localStorage.getItem(KEY_DATA);
   try { DATA = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA)); }
   catch(e) { DATA = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
-  if (!DATA.rpg) DATA.rpg = { xp: 0, totalDone: 0, unlocked: [], sprintsFinished: 0 };
+  if (!DATA.rpg) DATA.rpg = { xp: 0, totalDone: 0, unlocked: [], sprintsFinished: 0, streak: 0, lastDoneDate: null, completedLog: [] };
+  // Migrations for v4 fields
+  if (DATA.rpg.streak === undefined) DATA.rpg.streak = 0;
+  if (DATA.rpg.lastDoneDate === undefined) DATA.rpg.lastDoneDate = null;
+  if (!Array.isArray(DATA.rpg.completedLog)) DATA.rpg.completedLog = [];
+  // Tasks: ensure priority and deadline fields exist
+  (DATA.sprint.tasks || []).forEach(t => {
+    if (t.priority === undefined) t.priority = 1;
+    if (t.deadline === undefined) t.deadline = null;
+  });
   LANG = localStorage.getItem(KEY_LANG) || "ru";
 }
 function save() { localStorage.setItem(KEY_DATA, JSON.stringify(DATA)); }
@@ -586,7 +686,23 @@ function computeStats() {
     milestones: DATA.milestones,
     xp: DATA.rpg.xp,
     unlocked: DATA.rpg.unlocked,
+    streak: DATA.rpg.streak || 0,
+    completedLog: DATA.rpg.completedLog || [],
   };
+}
+function getXpToday() {
+  const dayAgo = Date.now() - 24*60*60*1000;
+  return (DATA.rpg.completedLog || [])
+    .filter(e => e.doneAt >= dayAgo)
+    .reduce((sum, e) => sum + (e.xp || 0), 0);
+}
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function yesterdayKey() {
+  const d = new Date(Date.now() - 24*60*60*1000);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
 function currentTier(xp) {
   let tier = TIERS[0], next = TIERS[1];
@@ -609,15 +725,36 @@ function checkAchievements() {
   return newly;
 }
 function onTaskToggled(task) {
+  const xpDelta = XP_BY_KIND[task.kind] || 2;
+  const tierBefore = currentTier(DATA.rpg.xp).tier.roman;
   if (task.done) {
-    DATA.rpg.xp += XP_BY_KIND[task.kind] || 2;
+    DATA.rpg.xp += xpDelta;
     DATA.rpg.totalDone += 1;
+    // streak logic
+    const td = todayKey(), yd = yesterdayKey();
+    if (DATA.rpg.lastDoneDate === td) {
+      // already closed something today — streak stays
+    } else if (DATA.rpg.lastDoneDate === yd) {
+      DATA.rpg.streak = (DATA.rpg.streak || 0) + 1;
+    } else {
+      DATA.rpg.streak = 1;
+    }
+    DATA.rpg.lastDoneDate = td;
+    // completed log
+    DATA.rpg.completedLog = DATA.rpg.completedLog || [];
+    DATA.rpg.completedLog.push({ id: task.id, kind: task.kind, xp: xpDelta, doneAt: Date.now() });
+    // keep only last 500
+    if (DATA.rpg.completedLog.length > 500) DATA.rpg.completedLog = DATA.rpg.completedLog.slice(-500);
   } else {
-    DATA.rpg.xp = Math.max(0, DATA.rpg.xp - (XP_BY_KIND[task.kind] || 2));
+    DATA.rpg.xp = Math.max(0, DATA.rpg.xp - xpDelta);
     DATA.rpg.totalDone = Math.max(0, DATA.rpg.totalDone - 1);
+    // remove latest matching entry from log
+    const log = DATA.rpg.completedLog || [];
+    for (let i = log.length - 1; i >= 0; i--) {
+      if (log[i].id === task.id) { log.splice(i, 1); break; }
+    }
   }
-  const tierBefore = currentTier(DATA.rpg.xp - (task.done ? 1 : -1)).tier.roman;
-  const tierAfter  = currentTier(DATA.rpg.xp).tier.roman;
+  const tierAfter = currentTier(DATA.rpg.xp).tier.roman;
   const newAchievements = checkAchievements();
   save();
   newAchievements.forEach(a => toast(t("toastAchUnlocked"), loc(a.name), loc(a.desc), a.symbol));
@@ -669,9 +806,22 @@ function renderSprint() {
   else { el.textContent = `${t("overdue")} ${-diff} ${-diff === 1 ? t("day") : t("days")}`; el.classList.add("crit"); }
 
   const list = $("taskList"); list.innerHTML = "";
+  const query = (SEARCH.query || "").toLowerCase().trim();
+  const activeKinds = SEARCH.kinds;
   DATA.sprint.tasks.forEach((task, idx) => {
+    // filter
+    if (query && !loc(task.label).toLowerCase().includes(query)) return;
+    if (activeKinds.size && !activeKinds.has(task.kind)) return;
+
     const li = document.createElement("li");
     li.className = "task" + (task.done ? " done" : "");
+
+    // priority marker
+    const prio = document.createElement("span"); prio.className = "prio";
+    const p = (task.priority ?? 1);
+    prio.setAttribute("data-p", p);
+    prio.title = ["P0 high","P1 normal","P2 low"][p] || "P1";
+    prio.addEventListener("click", (e) => { e.stopPropagation(); task.priority = ((task.priority ?? 1) + 1) % 3; save(); renderSprint(); });
 
     const chk = document.createElement("span"); chk.className = "chk";
     chk.addEventListener("click", () => { task.done = !task.done; onTaskToggled(task); renderAll(); });
@@ -679,6 +829,27 @@ function renderSprint() {
     const labelEl = document.createElement("span"); labelEl.className = "label";
     labelEl.textContent = loc(task.label);
     makeEditable(labelEl, () => loc(task.label), (v) => { task.label[LANG] = v; });
+
+    // deadline badge
+    const dead = document.createElement("span"); dead.className = "deadline";
+    const ddl = task.deadline;
+    if (!ddl) {
+      dead.classList.add("empty");
+      dead.textContent = "+ deadline";
+    } else {
+      const diff = Math.ceil((new Date(ddl) - new Date(todayKey())) / 86400000);
+      if (diff < 0)      { dead.classList.add("overdue"); dead.textContent = `-${-diff}d`; }
+      else if (diff === 0){ dead.classList.add("today");   dead.textContent = t("deadlineToday"); }
+      else if (diff <= 3){ dead.classList.add("soon");    dead.textContent = `${diff}d`; }
+      else               { dead.textContent = `${diff}d`; }
+    }
+    dead.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const v = prompt(t("setDeadline"), task.deadline || todayKey());
+      if (v === null) return;
+      task.deadline = v.trim() === "" ? null : (/^\d{4}-\d{2}-\d{2}$/.test(v.trim()) ? v.trim() : task.deadline);
+      save(); renderSprint();
+    });
 
     const tagEl = document.createElement("span"); tagEl.className = "tag"; tagEl.setAttribute("data-kind", task.kind);
     tagEl.textContent = task.kind + " ▾";
@@ -700,9 +871,12 @@ function renderSprint() {
     const del = document.createElement("span"); del.className = "del"; del.textContent = "×";
     del.addEventListener("click", (e) => { e.stopPropagation(); DATA.sprint.tasks.splice(idx, 1); save(); renderAll(); });
 
-    li.append(chk, labelEl, tagEl, del);
+    li.append(prio, chk, labelEl, dead, tagEl, del);
     list.appendChild(li);
   });
+
+  // Render chips (reflect active state)
+  renderSearchChips();
 
   const done = DATA.sprint.tasks.filter(x => x.done).length;
   const total = DATA.sprint.tasks.length;
@@ -733,6 +907,8 @@ function renderRpg() {
   $("statMarks").textContent = DATA.rpg.xp;
   $("statDone").textContent = DATA.rpg.totalDone;
   $("statAch").textContent = `${DATA.rpg.unlocked.length}/${ACHIEVEMENTS.length}`;
+  $("statStreak").textContent = DATA.rpg.streak || 0;
+  $("statXpToday").textContent = getXpToday();
 
   const grid = $("achGrid"); grid.innerHTML = "";
   ACHIEVEMENTS.forEach(a => {
@@ -784,6 +960,22 @@ function renderRoadmap() {
     });
   });
 }
+function renderSearchChips() {
+  const box = $("searchChips"); if (!box) return;
+  box.innerHTML = "";
+  ["ui","code","script","render","audio","other"].forEach(k => {
+    const c = document.createElement("span");
+    c.className = "search-chip" + (SEARCH.kinds.has(k) ? " active" : "");
+    c.setAttribute("data-kind", k);
+    c.textContent = k;
+    c.addEventListener("click", () => {
+      if (SEARCH.kinds.has(k)) SEARCH.kinds.delete(k);
+      else SEARCH.kinds.add(k);
+      renderSprint();
+    });
+    box.appendChild(c);
+  });
+}
 function renderAll() { renderI18n(); renderHeader(); renderSprint(); renderRpg(); renderMilestones(); renderRoadmap(); }
 
 function closeAllMenus() { document.querySelectorAll(".kind-menu").forEach(m => m.remove()); }
@@ -795,6 +987,12 @@ document.addEventListener("click", (e) => {
 document.querySelectorAll(".lang-switch button").forEach(b => {
   b.addEventListener("click", () => { LANG = b.getAttribute("data-lang"); saveLang(); renderAll(); });
 });
+// Search input
+{
+  const input = $("searchInput");
+  input.addEventListener("input", () => { SEARCH.query = input.value; renderSprint(); });
+  input.setAttribute("placeholder", t("searchPlaceholder"));
+}
 makeEditable($("sprintName"), () => loc(DATA.sprint.name), (v) => { DATA.sprint.name[LANG] = v; });
 makeEditable($("lastCommit"), () => DATA.lastCommit, (v) => { DATA.lastCommit = v; });
 $("editDates").addEventListener("click", () => {
