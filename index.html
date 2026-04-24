@@ -57,7 +57,102 @@ header {
   width: 56px; height: 56px; border: 1px solid var(--brass-dim); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   color: var(--brass); font-family: var(--display); font-weight: 500; font-size: 22px; letter-spacing: 0.04em;
+  position: relative; transition: all 300ms;
 }
+/* Tier decorations on the medallion */
+.medal.tier-2  { border-width: 2px; }
+.medal.tier-3  { border-style: dashed; }
+.medal.tier-4  { box-shadow: 0 0 10px rgba(184,145,107,0.3); }
+.medal.tier-5  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass-dim); }
+.medal.tier-6  { text-shadow: 0 0 6px var(--brass-hi); color: var(--brass-hi); box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass-dim); }
+.medal.tier-7  { text-shadow: 0 0 6px var(--brass-hi); color: var(--brass-hi); box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass); animation: medalPulse 3s ease-in-out infinite; }
+.medal.tier-8  { text-shadow: 0 0 8px var(--brass-hi); color: var(--brass-hi); box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass); background: radial-gradient(circle, rgba(184,145,107,0.12), transparent 70%); animation: medalPulse 3s ease-in-out infinite; }
+.medal.tier-9  { text-shadow: 0 0 10px var(--brass-hi); color: var(--brass-hi); box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass), 0 0 24px rgba(184,145,107,0.35); background: radial-gradient(circle, rgba(184,145,107,0.18), transparent 70%); animation: medalPulse 2.4s ease-in-out infinite; }
+.medal.tier-10 { text-shadow: 0 0 14px var(--brass-hi); color: var(--bone); box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass-hi), 0 0 32px rgba(212,176,137,0.5); background: radial-gradient(circle, rgba(212,176,137,0.25), transparent 70%); animation: medalPulse 1.8s ease-in-out infinite; border-color: var(--brass-hi); }
+@keyframes medalPulse {
+  0%,100% { box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass), 0 0 16px rgba(184,145,107,0.25); }
+  50%     { box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass-hi), 0 0 28px rgba(212,176,137,0.45); }
+}
+
+/* Fullscreen Tier-up overlay */
+.tier-up-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: radial-gradient(circle at center, rgba(20,25,33,0.85) 0%, rgba(11,16,22,0.98) 70%);
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  opacity: 0; pointer-events: none; transition: opacity 500ms;
+  backdrop-filter: blur(4px);
+}
+.tier-up-overlay.show { opacity: 1; pointer-events: auto; }
+.tier-up-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.5em;
+  color: var(--brass); text-transform: uppercase; margin-bottom: 32px;
+  opacity: 0; transform: translateY(-12px);
+  animation: tierLabelIn 600ms 200ms forwards;
+}
+.tier-up-roman {
+  font-family: var(--display); font-size: 128px; font-weight: 600;
+  letter-spacing: 0.2em; color: var(--brass-hi);
+  text-shadow: 0 0 40px rgba(184,145,107,0.6);
+  opacity: 0; transform: scale(0.7);
+  animation: tierRomanIn 900ms 400ms cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+  position: relative;
+}
+.tier-up-roman::before, .tier-up-roman::after {
+  content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  border: 1px solid var(--brass-dim); pointer-events: none;
+  opacity: 0; animation: tierRingExpand 1800ms 500ms ease-out forwards;
+}
+.tier-up-roman::before { width: 200px; height: 200px; }
+.tier-up-roman::after  { width: 200px; height: 200px; animation-delay: 800ms; }
+.tier-up-name {
+  font-family: var(--display); font-size: 28px; letter-spacing: 0.22em;
+  color: var(--bone); text-transform: uppercase; margin-top: 28px;
+  opacity: 0; transform: translateY(12px);
+  animation: tierNameIn 700ms 900ms forwards;
+}
+.tier-up-hint {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  color: var(--paper-dim); text-transform: uppercase; margin-top: 48px;
+  opacity: 0; animation: tierHintIn 600ms 1500ms forwards;
+}
+@keyframes tierLabelIn  { to { opacity: 1; transform: translateY(0); } }
+@keyframes tierRomanIn  { to { opacity: 1; transform: scale(1); } }
+@keyframes tierNameIn   { to { opacity: 1; transform: translateY(0); } }
+@keyframes tierHintIn   { to { opacity: 0.7; } }
+@keyframes tierRingExpand {
+  0%   { opacity: 0.8; width: 140px; height: 140px; }
+  100% { opacity: 0;   width: 420px; height: 420px; }
+}
+
+/* Daily quest card */
+.quest-card {
+  grid-column: 1 / -1;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
+  padding: 14px 18px; margin-top: 22px; border-top: 1px dashed var(--hairline);
+  position: relative;
+}
+.quest-card.completed { opacity: 0.55; }
+.quest-symbol {
+  font-family: var(--display); font-size: 22px; color: var(--brass);
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--brass-dim); border-radius: 50%;
+}
+.quest-card.completed .quest-symbol { color: var(--bg); background: var(--brass); border-color: var(--brass); }
+.quest-body { min-width: 0; }
+.quest-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em;
+  color: var(--paper-dim); text-transform: uppercase; margin-bottom: 2px;
+}
+.quest-name {
+  font-family: var(--display); font-size: 14px; letter-spacing: 0.14em;
+  color: var(--bone); text-transform: uppercase; margin-bottom: 4px;
+}
+.quest-desc { font-family: var(--serif); font-size: 13px; color: var(--paper); font-style: italic; }
+.quest-progress {
+  font-family: var(--mono); font-size: 11px; color: var(--brass);
+  letter-spacing: 0.1em; text-align: right; min-width: 80px;
+}
+.quest-progress .reward { display: block; font-size: 9px; color: var(--paper-dim); margin-top: 2px; letter-spacing: 0.18em; }
 h1 { font-family: var(--display); font-weight: 500; font-size: 42px; letter-spacing: 0.18em; margin: 0 0 6px; color: var(--bone); text-transform: uppercase; }
 h1 .amp { color: var(--brass); }
 .subhead { font-family: var(--label); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--paper); }
@@ -442,6 +537,18 @@ footer .actions a.danger:hover { color: var(--bruised); }
           <div class="tier-stat-value" id="statXpToday">0</div>
         </div>
       </div>
+      <div class="quest-card" id="questCard">
+        <div class="quest-symbol" id="questSymbol">◈</div>
+        <div class="quest-body">
+          <div class="quest-label" data-i18n="dailyQuest">Daily quest</div>
+          <div class="quest-name" id="questName">—</div>
+          <div class="quest-desc" id="questDesc">—</div>
+        </div>
+        <div class="quest-progress">
+          <span id="questProgress">0/0</span>
+          <span class="reward">+<span id="questReward">0</span> XP</span>
+        </div>
+      </div>
     </div>
     <div>
       <div class="ach-grid" id="achGrid"></div>
@@ -476,7 +583,7 @@ footer .actions a.danger:hover { color: var(--bruised); }
 </section>
 
 <footer>
-  <div class="left" id="footerLeft">VELVET SILENCE · ledger v4.0 · click any text to edit</div>
+  <div class="left" id="footerLeft">VELVET SILENCE · ledger v5.0 · click any text to edit</div>
   <div class="actions">
     <a id="exportBtn" data-i18n="exportData">export json</a>
     <a id="importBtn" data-i18n="importData">import json</a>
@@ -486,6 +593,14 @@ footer .actions a.danger:hover { color: var(--bruised); }
 
 <input type="file" id="importFile" style="display:none" accept=".json">
 <div class="toast-container" id="toastBox"></div>
+
+<!-- Fullscreen tier-up overlay -->
+<div class="tier-up-overlay" id="tierUpOverlay">
+  <div class="tier-up-label" id="tierUpLabel">Tier Ascended</div>
+  <div class="tier-up-roman" id="tierUpRoman">—</div>
+  <div class="tier-up-name" id="tierUpName">—</div>
+  <div class="tier-up-hint" id="tierUpHint">click anywhere to dismiss</div>
+</div>
 
 </div>
 
@@ -501,7 +616,7 @@ const I18N = {
     progress: "Progress", wip: "Fatigue · WIP", lastCommit: "Last commit",
     addTask: "+ add task", addMilestone: "+ add milestone", addItem: "+ add item",
     exportData: "export json", importData: "import json", resetAll: "reset to defaults",
-    editDates: "[edit dates]", footerLeft: "VELVET SILENCE · ledger v4.0 · click any text to edit",
+    editDates: "[edit dates]", footerLeft: "VELVET SILENCE · ledger v5.0 · click any text to edit",
     endsIn: "ends in", overdue: "overdue", endsToday: "ends today", day: "day", days: "days",
     newTask: "New task", newItem: "New item", newMilestoneAct: "Act N", newMilestoneName: "Milestone name",
     confirmReset: "Reset ALL data to defaults? This cannot be undone (unless you exported a backup).",
@@ -511,6 +626,8 @@ const I18N = {
     marksToNext: "Marks to next tier", totalMarks: "Total marks", tasksDone: "Tasks done", achUnlocked: "Achievements",
     toastAchUnlocked: "Achievement unlocked", toastTierUp: "Tier ascended",
     streak: "Streak", xpToday: "XP today",
+    dailyQuest: "Daily quest", questComplete: "Quest complete",
+    tierAscended: "Tier Ascended", dismissHint: "click anywhere to dismiss",
     searchPlaceholder: "search tasks…",
     setPriority: "Set priority (0=high, 1=normal, 2=low):",
     setDeadline: "Deadline (YYYY-MM-DD or empty to clear):",
@@ -526,7 +643,7 @@ const I18N = {
     progress: "Прогресс", wip: "Усталость · В работе", lastCommit: "Последний коммит",
     addTask: "+ добавить задачу", addMilestone: "+ добавить веху", addItem: "+ добавить пункт",
     exportData: "экспорт json", importData: "импорт json", resetAll: "сбросить к дефолту",
-    editDates: "[изм. даты]", footerLeft: "VELVET SILENCE · журнал v4.0 · кликни любой текст чтобы редактировать",
+    editDates: "[изм. даты]", footerLeft: "VELVET SILENCE · журнал v5.0 · кликни любой текст чтобы редактировать",
     endsIn: "до конца", overdue: "просрочено", endsToday: "заканчивается сегодня", day: "день", days: "дн.",
     newTask: "Новая задача", newItem: "Новый пункт", newMilestoneAct: "Акт N", newMilestoneName: "Название вехи",
     confirmReset: "Сбросить ВСЕ данные к заводским? Отмена невозможна (если не экспортировал бэкап).",
@@ -536,6 +653,8 @@ const I18N = {
     marksToNext: "Меток до следующего ранга", totalMarks: "Всего меток", tasksDone: "Задач закрыто", achUnlocked: "Достижения",
     toastAchUnlocked: "Достижение разблокировано", toastTierUp: "Ранг повышен",
     streak: "Серия", xpToday: "XP сегодня",
+    dailyQuest: "Дневной квест", questComplete: "Квест выполнен",
+    tierAscended: "Ранг Повышен", dismissHint: "клик чтобы закрыть",
     searchPlaceholder: "поиск задач…",
     setPriority: "Приоритет (0=высокий, 1=обычный, 2=низкий):",
     setDeadline: "Дедлайн (ГГГГ-ММ-ДД или пусто чтобы очистить):",
@@ -578,6 +697,54 @@ const ACHIEVEMENTS = [
   { id: "early_bird",   symbol: "✹", xp: 10, name: { en: "Early Bird",       ru: "Ранняя Пташка"      }, desc: { en: "Close a task before 9 AM.",                                  ru: "Закрой задачу до 9 утра." }, check: (s) => s.completedLog.some(e => new Date(e.doneAt).getHours() < 9) },
   { id: "night_owl",    symbol: "☾", xp: 10, name: { en: "Night Owl",        ru: "Ночная Сова"        }, desc: { en: "Close a task after midnight.",                               ru: "Закрой задачу после полуночи." }, check: (s) => s.completedLog.some(e => { const h = new Date(e.doneAt).getHours(); return h >= 0 && h < 4; }) },
 ];
+
+// ============ DAILY QUESTS ============
+const DAILY_QUESTS = [
+  { id: "close_3",       symbol: "◈", target: 3, kind: null,     reward: 20, name: { en: "Steady Hand",    ru: "Твёрдая Рука"    }, desc: { en: "Close 3 tasks today.",                         ru: "Закрой 3 задачи сегодня." } },
+  { id: "close_render",  symbol: "▣", target: 1, kind: "render", reward: 15, name: { en: "The Frame",      ru: "Кадр"            }, desc: { en: "Close 1 render task today.",                   ru: "Закрой 1 render-задачу сегодня." } },
+  { id: "close_script",  symbol: "❦", target: 1, kind: "script", reward: 15, name: { en: "The Ink",        ru: "Чернила"         }, desc: { en: "Close 1 script task today.",                   ru: "Закрой 1 script-задачу сегодня." } },
+  { id: "close_2_ui",    symbol: "◇", target: 2, kind: "ui",     reward: 12, name: { en: "Polish",         ru: "Блеск"           }, desc: { en: "Close 2 UI tasks today.",                      ru: "Закрой 2 ui-задачи сегодня." } },
+  { id: "close_code",    symbol: "⌘", target: 1, kind: "code",   reward: 15, name: { en: "The Compiler",   ru: "Компилятор"      }, desc: { en: "Close 1 code task today.",                     ru: "Закрой 1 code-задачу сегодня." } },
+  { id: "close_audio",   symbol: "♪", target: 1, kind: "audio",  reward: 15, name: { en: "The Harmonic",   ru: "Гармоника"       }, desc: { en: "Close 1 audio task today.",                    ru: "Закрой 1 audio-задачу сегодня." } },
+  { id: "keep_flame",    symbol: "☀", target: 1, kind: null,     reward: 10, name: { en: "Keep the Flame", ru: "Храни Пламя"     }, desc: { en: "Close any task to keep your streak alive.",    ru: "Закрой любую задачу — серия не прервётся." } },
+];
+
+function pickDailyQuest() {
+  // Deterministic by date so all devices pick the same quest on same day
+  const key = todayKey();
+  const seed = key.split("-").reduce((a,b) => a * 31 + parseInt(b), 0);
+  const idx = ((seed % DAILY_QUESTS.length) + DAILY_QUESTS.length) % DAILY_QUESTS.length;
+  const q = DAILY_QUESTS[idx];
+  return { date: key, questId: q.id, progress: 0, completed: false };
+}
+
+function ensureDailyQuest() {
+  const key = todayKey();
+  if (!DATA.rpg.dailyQuest || DATA.rpg.dailyQuest.date !== key) {
+    DATA.rpg.dailyQuest = pickDailyQuest();
+  }
+}
+
+function getActiveQuest() {
+  ensureDailyQuest();
+  const q = DAILY_QUESTS.find(x => x.id === DATA.rpg.dailyQuest.questId);
+  return { meta: q, state: DATA.rpg.dailyQuest };
+}
+
+function trackQuestProgress(task, delta) {
+  // delta: +1 when closed, -1 when unchecked
+  ensureDailyQuest();
+  const { meta, state } = getActiveQuest();
+  if (!meta || state.completed) return false;
+  if (meta.kind !== null && task.kind !== meta.kind) return false;
+  state.progress = Math.max(0, (state.progress || 0) + delta);
+  if (state.progress >= meta.target && !state.completed && delta > 0) {
+    state.completed = true;
+    DATA.rpg.xp += meta.reward;
+    return meta; // signal for toast
+  }
+  return false;
+}
 
 // ============ DEFAULT DATA ============
 // Neutral template. Real data is imported from JSON by the owner.
@@ -629,6 +796,7 @@ function loadState() {
   if (DATA.rpg.streak === undefined) DATA.rpg.streak = 0;
   if (DATA.rpg.lastDoneDate === undefined) DATA.rpg.lastDoneDate = null;
   if (!Array.isArray(DATA.rpg.completedLog)) DATA.rpg.completedLog = [];
+  if (!DATA.rpg.dailyQuest) DATA.rpg.dailyQuest = null;
   // Tasks: ensure priority and deadline fields exist
   (DATA.sprint.tasks || []).forEach(t => {
     if (t.priority === undefined) t.priority = 1;
@@ -754,14 +922,31 @@ function onTaskToggled(task) {
       if (log[i].id === task.id) { log.splice(i, 1); break; }
     }
   }
+  // daily quest progress
+  const questCompleted = trackQuestProgress(task, task.done ? 1 : -1);
   const tierAfter = currentTier(DATA.rpg.xp).tier.roman;
   const newAchievements = checkAchievements();
   save();
   newAchievements.forEach(a => toast(t("toastAchUnlocked"), loc(a.name), loc(a.desc), a.symbol));
-  if (tierBefore !== tierAfter && task.done) {
-    const tc = currentTier(DATA.rpg.xp).tier;
-    toast(t("toastTierUp"), `${tc.roman} · ${loc(tc.name)}`, "", "✶");
+  if (questCompleted) {
+    toast(t("questComplete"), loc(questCompleted.name), `+${questCompleted.reward} XP`, questCompleted.symbol);
   }
+  if (tierBefore !== tierAfter && task.done) {
+    showTierUpOverlay();
+  }
+}
+
+function showTierUpOverlay() {
+  const tc = currentTier(DATA.rpg.xp).tier;
+  $("tierUpLabel").textContent = t("tierAscended");
+  $("tierUpRoman").textContent = tc.roman;
+  $("tierUpName").textContent  = loc(tc.name);
+  $("tierUpHint").textContent  = t("dismissHint");
+  const ov = $("tierUpOverlay");
+  ov.classList.add("show");
+  const hide = () => { ov.classList.remove("show"); ov.removeEventListener("click", hide); clearTimeout(autoHide); };
+  const autoHide = setTimeout(hide, 5000);
+  ov.addEventListener("click", hide);
 }
 
 function toast(label, title, desc, symbol) {
@@ -909,6 +1094,25 @@ function renderRpg() {
   $("statAch").textContent = `${DATA.rpg.unlocked.length}/${ACHIEVEMENTS.length}`;
   $("statStreak").textContent = DATA.rpg.streak || 0;
   $("statXpToday").textContent = getXpToday();
+
+  // Tier decoration on medallion
+  const medal = document.querySelector(".medal");
+  if (medal) {
+    for (let i = 1; i <= 10; i++) medal.classList.remove("tier-" + i);
+    const tierIdx = TIERS.findIndex(x => x.roman === tier.roman) + 1;
+    medal.classList.add("tier-" + tierIdx);
+  }
+
+  // Daily quest
+  const { meta, state } = getActiveQuest();
+  if (meta) {
+    $("questName").textContent = loc(meta.name);
+    $("questDesc").textContent = loc(meta.desc);
+    $("questSymbol").textContent = meta.symbol;
+    $("questProgress").textContent = `${Math.min(state.progress, meta.target)}/${meta.target}`;
+    $("questReward").textContent = meta.reward;
+    $("questCard").classList.toggle("completed", !!state.completed);
+  }
 
   const grid = $("achGrid"); grid.innerHTML = "";
   ACHIEVEMENTS.forEach(a => {
