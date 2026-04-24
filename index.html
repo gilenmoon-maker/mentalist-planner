@@ -784,7 +784,8 @@ const DEFAULT_DATA = {
 // ============ STATE ============
 const KEY_DATA = "mentalist_planner_data_v3";
 const KEY_LANG = "mentalist_planner_lang";
-let DATA, LANG;
+let DATA;
+let LANG = "ru";
 const SEARCH = { query: "", kinds: new Set() };
 
 function loadState() {
@@ -968,6 +969,8 @@ function renderI18n() {
   document.querySelectorAll(".lang-switch button").forEach(b => b.classList.toggle("active", b.getAttribute("data-lang") === LANG));
   $("footerLeft").textContent = t("footerLeft");
   $("editDates").textContent = t("editDates");
+  const si = $("searchInput");
+  if (si) si.setAttribute("placeholder", t("searchPlaceholder"));
 }
 function renderHeader() {
   const now = new Date();
@@ -1194,8 +1197,9 @@ document.querySelectorAll(".lang-switch button").forEach(b => {
 // Search input
 {
   const input = $("searchInput");
-  input.addEventListener("input", () => { SEARCH.query = input.value; renderSprint(); });
-  input.setAttribute("placeholder", t("searchPlaceholder"));
+  if (input) {
+    input.addEventListener("input", () => { SEARCH.query = input.value; renderSprint(); });
+  }
 }
 makeEditable($("sprintName"), () => loc(DATA.sprint.name), (v) => { DATA.sprint.name[LANG] = v; });
 makeEditable($("lastCommit"), () => DATA.lastCommit, (v) => { DATA.lastCommit = v; });
