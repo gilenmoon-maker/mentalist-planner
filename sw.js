@@ -2,7 +2,7 @@
 // Cache-first strategy: all planner assets are cached on install,
 // then served from cache offline. Bump CACHE_VERSION to force refresh.
 
-const CACHE_VERSION = "mentalist-planner-v5";
+const CACHE_VERSION = "mentalist-planner-v5.1";
 const ASSETS = [
   "./",
   "./index.html",

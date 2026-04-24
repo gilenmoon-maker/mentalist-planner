@@ -1207,7 +1207,16 @@ $("editDates").addEventListener("click", () => {
   save(); renderSprint();
 });
 $("addTaskBtn").addEventListener("click", () => {
-  DATA.sprint.tasks.push({ id: newId("t"), kind: "other", done: false, label: makeLocField(t("newTask")) });
+  // Clear any active filter so the new task is definitely visible
+  SEARCH.query = "";
+  SEARCH.kinds.clear();
+  const si = $("searchInput");
+  if (si) si.value = "";
+  DATA.sprint.tasks.push({
+    id: newId("t"), kind: "other", done: false,
+    label: makeLocField(t("newTask")),
+    priority: 1, deadline: null,
+  });
   save(); renderSprint();
 });
 $("addMilestoneBtn").addEventListener("click", () => {
