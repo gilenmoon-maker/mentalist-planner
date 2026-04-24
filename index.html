@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Mentalist · Production Ledger</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1016">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mentalist">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0b1016;
+  --surface:   #141921;
+  --surface-2: #1a2029;
+  --hairline:  #3a3a32;
+  --bone:      #f4eee4;
+  --paper:     #8b8576;
+  --paper-dim: #5c5a54;
+  --brass:     #b8916b;
+  --brass-dim: #826947;
+  --brass-hi:  #d4b089;
+  --bruised:   #8c3b3b;
+  --serif:     "Cormorant Garamond", "Lora", Georgia, serif;
+  --serif-ru:  "Lora", "Cormorant Garamond", Georgia, serif;
+  --display:   "Cinzel", "Manrope", serif;
+  --label:     "Manrope", -apple-system, system-ui, sans-serif;
+  --mono:      "JetBrains Mono", ui-monospace, monospace;
+}
+html[lang="ru"] { --serif: var(--serif-ru); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--bone); }
+body {
+  font-family: var(--serif); font-size: 16px; line-height: 1.55; min-height: 100vh;
+  background: radial-gradient(1200px 800px at 20% -10%, #18202b 0%, transparent 60%),
+              radial-gradient(900px 600px at 110% 120%, #0f1a22 0%, transparent 55%), var(--bg);
+  background-attachment: fixed;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 72px 56px 120px; }
+
+/* header */
+header {
+  display: grid; grid-template-columns: 68px 1fr auto auto;
+  gap: 28px; align-items: end;
+  padding-bottom: 28px; border-bottom: 1px dashed var(--hairline);
+}
+.medal {
+  width: 56px; height: 56px; border: 1px solid var(--brass-dim); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brass); font-family: var(--display); font-weight: 500; font-size: 22px; letter-spacing: 0.04em;
+}
+h1 { font-family: var(--display); font-weight: 500; font-size: 42px; letter-spacing: 0.18em; margin: 0 0 6px; color: var(--bone); text-transform: uppercase; }
+h1 .amp { color: var(--brass); }
+.subhead { font-family: var(--label); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--paper); }
+.tag-date { font-family: var(--mono); font-size: 11px; color: var(--paper-dim); text-align: right; line-height: 1.4; }
+.tag-date b { color: var(--paper); font-weight: 500; }
+
+.lang-switch { display: flex; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; border: 1px solid var(--brass-dim); align-self: center; }
+.lang-switch button {
+  background: transparent; border: none; color: var(--paper); padding: 6px 12px; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; transition: all 120ms;
+}
+.lang-switch button.active { background: var(--brass); color: var(--bg); }
+.lang-switch button:not(.active):hover { color: var(--brass); }
+
+/* section */
+section { margin: 64px 0 0; }
+.section-head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 24px; }
+.section-head h2 { font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: 0.32em; text-transform: uppercase; margin: 0; color: var(--brass); }
+.section-head .spec { font-family: var(--mono); font-size: 10px; color: var(--paper-dim); letter-spacing: 0.1em; }
+.section-head .rule { flex: 1; height: 1px; background: repeating-linear-gradient(90deg, var(--hairline) 0 4px, transparent 4px 8px); align-self: center; }
+
+/* sprint */
+.sprint-grid { display: grid; grid-template-columns: 1fr 280px; gap: 36px; }
+.sprint-meta { font-family: var(--label); font-size: 12px; color: var(--paper); margin-bottom: 18px; letter-spacing: 0.08em; display: flex; gap: 10px; align-items: center; }
+.sprint-meta .name { color: var(--bone); font-weight: 500; }
+.sprint-meta .countdown { color: var(--brass); }
+.sprint-meta .edit-mini { cursor: pointer; color: var(--paper-dim); font-family: var(--mono); font-size: 10px; }
+.sprint-meta .edit-mini:hover { color: var(--brass); }
+
+ul.tasks { list-style: none; padding: 0; margin: 0; }
+ul.tasks li.task {
+  display: grid; grid-template-columns: 26px 1fr auto 20px; gap: 14px;
+  padding: 12px 0; border-bottom: 1px dashed var(--hairline); align-items: baseline;
+}
+.chk {
+  width: 14px; height: 14px; border: 1px solid var(--brass-dim);
+  display: inline-block; position: relative; top: 2px; cursor: pointer; transition: all 150ms;
+}
+li.task.done .chk { background: var(--brass); border-color: var(--brass); }
+li.task.done .chk::after {
+  content: ""; position: absolute; left: 3px; top: -1px; width: 5px; height: 10px;
+  border: solid var(--bg); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
+}
+li.task.done .label { color: var(--paper-dim); text-decoration: line-through; text-decoration-color: var(--brass-dim); }
+.task .label { font-family: var(--serif); font-size: 17px; color: var(--bone); cursor: text; padding: 2px 4px; margin: -2px -4px; border-radius: 2px; }
+.task .label:hover { background: rgba(184, 145, 107, 0.08); }
+.task .tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: lowercase;
+  cursor: pointer; padding: 2px 8px; border: 1px dashed transparent; position: relative; user-select: none;
+}
+.task .tag:hover { border-color: var(--brass-dim); }
+.task .tag[data-kind="code"]   { color: #7f96b5; }
+.task .tag[data-kind="script"] { color: var(--brass); }
+.task .tag[data-kind="render"] { color: #a88080; }
+.task .tag[data-kind="audio"]  { color: #8aa580; }
+.task .tag[data-kind="ui"]     { color: #a07fa8; }
+.task .tag[data-kind="other"]  { color: var(--paper); }
+.task .del { font-family: var(--mono); font-size: 14px; color: var(--paper-dim); cursor: pointer; opacity: 0; transition: opacity 120ms; text-align: center; line-height: 20px; }
+li.task:hover .del { opacity: 1; }
+.task .del:hover { color: var(--bruised); }
+
+/* custom kind dropdown */
+.kind-menu {
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 20;
+  background: var(--surface); border: 1px solid var(--brass-dim);
+  min-width: 100px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.kind-menu .kind-opt {
+  padding: 6px 12px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: lowercase; cursor: pointer; color: var(--paper); user-select: none; transition: all 100ms;
+}
+.kind-menu .kind-opt:hover { background: var(--brass); color: var(--bg); }
+.kind-menu .kind-opt[data-kind="code"]   { color: #7f96b5; }
+.kind-menu .kind-opt[data-kind="script"] { color: var(--brass); }
+.kind-menu .kind-opt[data-kind="render"] { color: #a88080; }
+.kind-menu .kind-opt[data-kind="audio"]  { color: #8aa580; }
+.kind-menu .kind-opt[data-kind="ui"]     { color: #a07fa8; }
+.kind-menu .kind-opt[data-kind="other"]  { color: var(--paper); }
+.kind-menu .kind-opt:hover { color: var(--bg); }
+
+.inline-input { font-family: inherit; font-size: inherit; color: var(--bone); background: var(--surface-2); border: 1px solid var(--brass-dim); padding: 2px 4px; width: 100%; outline: none; }
+.inline-input:focus { border-color: var(--brass); }
+
+.add-row { display: flex; justify-content: flex-start; margin-top: 14px; }
+.btn-add {
+  background: transparent; color: var(--brass); border: 1px dashed var(--brass-dim);
+  padding: 8px 16px; cursor: pointer; font-family: var(--label); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase; transition: all 150ms;
+}
+.btn-add:hover { background: rgba(184, 145, 107, 0.1); border-style: solid; }
+
+/* stat panel */
+.panel { border: 1px solid var(--hairline); padding: 24px 22px 20px; background: linear-gradient(180deg, var(--surface) 0%, transparent 100%); }
+.stat { margin-bottom: 18px; }
+.stat-label { font-family: var(--label); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--paper); margin-bottom: 6px; }
+.stat-value { font-family: var(--display); font-size: 26px; color: var(--bone); letter-spacing: 0.06em; }
+.stat-value .dim { color: var(--paper-dim); font-size: 16px; }
+.bar { height: 4px; background: var(--surface-2); border: 1px solid var(--hairline); position: relative; margin-top: 12px; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--brass-dim) 0%, var(--brass) 100%); transition: width 400ms ease-out; }
+.bar .fill.red { background: linear-gradient(90deg, #5a2a2a 0%, var(--bruised) 100%); }
+
+/* ===== RPG / Ascent panel ===== */
+.ascent {
+  display: grid; grid-template-columns: 360px 1fr; gap: 32px;
+  padding: 28px 32px; border: 1px solid var(--brass-dim);
+  background: linear-gradient(140deg, rgba(184,145,107,0.04) 0%, transparent 50%), var(--surface);
+  position: relative;
+}
+.ascent::before, .ascent::after {
+  content: ""; position: absolute; width: 8px; height: 8px;
+  border: 1px solid var(--brass-dim);
+}
+.ascent::before { top: -4px; left: -4px; border-right: none; border-bottom: none; }
+.ascent::after { bottom: -4px; right: -4px; border-left: none; border-top: none; }
+
+.tier-card { }
+.tier-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--paper); margin-bottom: 4px;
+}
+.tier-name {
+  font-family: var(--display); font-size: 32px; letter-spacing: 0.14em;
+  color: var(--bone); margin-bottom: 4px; text-transform: uppercase;
+}
+.tier-roman { font-family: var(--display); font-size: 18px; color: var(--brass); margin-right: 12px; letter-spacing: 0.18em; }
+.tier-xp-label { font-family: var(--mono); font-size: 11px; color: var(--paper-dim); margin: 18px 0 8px; letter-spacing: 0.1em; }
+.tier-bar { height: 6px; background: var(--surface-2); border: 1px solid var(--hairline); position: relative; margin-bottom: 6px; }
+.tier-bar .fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--brass-dim), var(--brass) 70%, var(--brass-hi)); transition: width 500ms ease-out; }
+.tier-xp-text { font-family: var(--mono); font-size: 10px; color: var(--paper); display: flex; justify-content: space-between; }
+.tier-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--hairline); }
+.tier-stat-label { font-family: var(--label); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--paper-dim); }
+.tier-stat-value { font-family: var(--display); font-size: 22px; color: var(--bone); margin-top: 2px; }
+
+.ach-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.ach {
+  padding: 14px; border: 1px dashed var(--hairline);
+  position: relative; min-height: 88px; display: flex; flex-direction: column;
+  transition: all 200ms;
+}
+.ach.unlocked {
+  border: 1px solid var(--brass-dim); background: linear-gradient(140deg, rgba(184,145,107,0.06) 0%, transparent 60%);
+}
+.ach.unlocked.fresh { animation: achPulse 2s ease-out; }
+@keyframes achPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(184,145,107,0.6); }
+  100% { box-shadow: 0 0 0 20px rgba(184,145,107,0); }
+}
+.ach-symbol { font-family: var(--display); font-size: 26px; color: var(--paper-dim); margin-bottom: 6px; letter-spacing: 0.04em; }
+.ach.unlocked .ach-symbol { color: var(--brass); }
+.ach-name { font-family: var(--display); font-size: 11px; letter-spacing: 0.14em; color: var(--paper); text-transform: uppercase; margin-bottom: 4px; }
+.ach.unlocked .ach-name { color: var(--bone); }
+.ach-desc { font-family: var(--serif); font-size: 13px; color: var(--paper-dim); font-style: italic; line-height: 1.35; flex: 1; }
+.ach.unlocked .ach-desc { color: var(--paper); font-style: normal; }
+.ach-xp { font-family: var(--mono); font-size: 9px; color: var(--paper-dim); letter-spacing: 0.12em; margin-top: 6px; }
+.ach.unlocked .ach-xp { color: var(--brass); }
+
+/* Toast for new achievement */
+.toast-container { position: fixed; top: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 12px; }
+.toast {
+  background: var(--surface); border: 1px solid var(--brass); padding: 16px 22px;
+  min-width: 280px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  animation: toastIn 300ms ease-out;
+  position: relative;
+}
+.toast::before, .toast::after {
+  content: ""; position: absolute; width: 6px; height: 6px; border: 1px solid var(--brass);
+}
+.toast::before { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+.toast::after { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+.toast-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--brass); text-transform: uppercase; margin-bottom: 4px; }
+.toast-title { font-family: var(--display); font-size: 16px; color: var(--bone); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.toast-desc { font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--paper); }
+
+/* milestones */
+.milestone { display: grid; grid-template-columns: 180px 1fr auto auto 90px 70px 20px; gap: 20px; padding: 16px 0; border-bottom: 1px dashed var(--hairline); align-items: center; }
+.milestone .act { font-family: var(--display); font-size: 13px; letter-spacing: 0.18em; color: var(--brass); cursor: text; padding: 2px 4px; }
+.milestone .name { font-family: var(--serif); font-size: 19px; color: var(--bone); cursor: text; padding: 2px 4px; }
+.milestone .done-input, .milestone .total-input { font-family: var(--mono); font-size: 11px; width: 46px; background: transparent; color: var(--paper); border: 1px dashed transparent; text-align: center; padding: 2px 4px; }
+.milestone .done-input:hover, .milestone .total-input:hover { border-color: var(--brass-dim); }
+.milestone .done-input:focus, .milestone .total-input:focus { outline: none; border-style: solid; border-color: var(--brass); background: var(--surface-2); }
+.milestone .pct { font-family: var(--mono); font-size: 12px; color: var(--paper); text-align: right; }
+.milestone .ratio { font-family: var(--mono); font-size: 10px; color: var(--paper-dim); text-align: right; }
+.milestone .del { font-family: var(--mono); font-size: 14px; color: var(--paper-dim); cursor: pointer; opacity: 0; text-align: center; }
+.milestone:hover .del { opacity: 1; }
+.milestone .del:hover { color: var(--bruised); }
+
+/* roadmap */
+.road { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.road-col h3 { font-family: var(--display); font-size: 12px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--brass); margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--brass-dim); }
+.road-col.next h3 { color: var(--paper); border-color: var(--paper-dim); }
+.road-col.later h3 { color: var(--paper-dim); border-color: var(--hairline); }
+.road-col ul { list-style: none; margin: 0; padding: 0; }
+.road-col li.road-item { display: grid; grid-template-columns: 14px 1fr 16px; gap: 6px; padding: 10px 0; position: relative; font-family: var(--serif); font-size: 16px; color: var(--bone); border-bottom: 1px dashed var(--hairline); align-items: baseline; }
+.road-col li.road-item::before { content: "·"; color: var(--brass); font-weight: bold; padding-left: 3px; }
+.road-col .text { cursor: text; padding: 2px 4px; margin: -2px -4px; border-radius: 2px; }
+.road-col .text:hover { background: rgba(184, 145, 107, 0.08); }
+.road-col.next .text { color: var(--paper); }
+.road-col.later .text { color: var(--paper-dim); font-style: italic; }
+.road-col .del-road { font-family: var(--mono); font-size: 12px; color: var(--paper-dim); cursor: pointer; opacity: 0; text-align: center; }
+.road-col li.road-item:hover .del-road { opacity: 1; }
+.road-col .del-road:hover { color: var(--bruised); }
+
+/* footer */
+footer { margin-top: 88px; padding-top: 24px; border-top: 1px dashed var(--hairline); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-family: var(--mono); font-size: 10px; color: var(--paper-dim); letter-spacing: 0.1em; }
+footer .actions a { color: var(--brass-dim); text-decoration: none; margin-left: 16px; cursor: pointer; }
+footer .actions a:hover { color: var(--brass); }
+footer .actions a.danger:hover { color: var(--bruised); }
+
+.crit { color: var(--bruised) !important; }
+
+@media (max-width: 900px) {
+  .wrap { padding: 48px 24px 80px; }
+  h1 { font-size: 30px; }
+  .sprint-grid, .road, .ascent { grid-template-columns: 1fr; }
+  .milestone { grid-template-columns: 1fr 1fr auto auto; grid-auto-rows: auto; }
+  .ach-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="medal">M</div>
+  <div>
+    <h1>Mentalist <span class="amp">·</span> <span id="titleSuffix">Production Ledger</span></h1>
+    <div class="subhead" id="subhead">Velvet Silence · solo dev · Ren'Py + VaM · RU/EN</div>
+  </div>
+  <div class="tag-date">
+    <b>D:\ProjectsV1\CLProjectV1</b><br>
+    <span id="today">—</span><br>
+    <span id="weeknum">—</span>
+  </div>
+  <div class="lang-switch">
+    <button data-lang="en">EN</button>
+    <button data-lang="ru">RU</button>
+  </div>
+</header>
+
+<section>
+  <div class="section-head">
+    <h2 data-i18n="currentSprint">Current Sprint</h2>
+    <span class="spec" data-i18n="sprintSpec">/ active</span>
+    <div class="rule"></div>
+    <span class="spec" id="sprintCountdown">—</span>
+  </div>
+  <div class="sprint-grid">
+    <div>
+      <div class="sprint-meta">
+        <span class="name" id="sprintName" data-editable="sprint.name">—</span>
+        <span>·</span>
+        <span id="sprintRange">—</span>
+        <span class="edit-mini" id="editDates">[edit dates]</span>
+      </div>
+      <ul class="tasks" id="taskList"></ul>
+      <div class="add-row"><button class="btn-add" id="addTaskBtn" data-i18n="addTask">+ add task</button></div>
+    </div>
+    <div class="panel">
+      <div class="stat">
+        <div class="stat-label" data-i18n="progress">Progress</div>
+        <div class="stat-value"><span id="sprintDone">0</span><span class="dim">/<span id="sprintTotal">0</span></span></div>
+        <div class="bar"><div class="fill" id="sprintBar"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label" data-i18n="wip">Fatigue · WIP</div>
+        <div class="stat-value" id="wipCount">0</div>
+        <div class="bar"><div class="fill red" id="wipBar"></div></div>
+      </div>
+      <div class="stat" style="margin-bottom:0">
+        <div class="stat-label" data-i18n="lastCommit">Last commit</div>
+        <div class="stat-value" style="font-size:14px; font-family:var(--mono); color: var(--paper);" id="lastCommit" data-editable="lastCommit">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RPG Ascent ===== -->
+<section>
+  <div class="section-head">
+    <h2 data-i18n="ascent">The Ascent</h2>
+    <span class="spec" id="ascentSpec">/ marks · tier · achievements</span>
+    <div class="rule"></div>
+  </div>
+  <div class="ascent">
+    <div class="tier-card">
+      <div class="tier-tag" data-i18n="tierLabel">Current Tier</div>
+      <div class="tier-name"><span class="tier-roman" id="tierRoman">I</span><span id="tierName">Apprentice</span></div>
+      <div class="tier-xp-label" data-i18n="marksToNext">Marks to next tier</div>
+      <div class="tier-bar"><div class="fill" id="tierBar"></div></div>
+      <div class="tier-xp-text">
+        <span id="tierXpCurrent">0</span>
+        <span id="tierXpNext">10</span>
+      </div>
+      <div class="tier-stats">
+        <div>
+          <div class="tier-stat-label" data-i18n="totalMarks">Total marks</div>
+          <div class="tier-stat-value" id="statMarks">0</div>
+        </div>
+        <div>
+          <div class="tier-stat-label" data-i18n="tasksDone">Tasks done</div>
+          <div class="tier-stat-value" id="statDone">0</div>
+        </div>
+        <div>
+          <div class="tier-stat-label" data-i18n="achUnlocked">Achievements</div>
+          <div class="tier-stat-value" id="statAch">0/0</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="ach-grid" id="achGrid"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2 data-i18n="milestones">Milestones</h2>
+    <span class="spec" id="milestonesSpec">/ 10 acts · MVP = Act 0</span>
+    <div class="rule"></div>
+  </div>
+  <div id="milestones"></div>
+  <div class="add-row"><button class="btn-add" id="addMilestoneBtn" data-i18n="addMilestone">+ add milestone</button></div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2 data-i18n="roadmap">Roadmap</h2>
+    <span class="spec" data-i18n="roadmapSpec">/ now · next · later</span>
+    <div class="rule"></div>
+  </div>
+  <div class="road">
+    <div class="road-col now"><h3 data-i18n="now">Now</h3><ul id="roadNow"></ul>
+      <div class="add-row"><button class="btn-add" data-add-road="now" data-i18n="addItem">+ add item</button></div></div>
+    <div class="road-col next"><h3 data-i18n="next">Next</h3><ul id="roadNext"></ul>
+      <div class="add-row"><button class="btn-add" data-add-road="next" data-i18n="addItem">+ add item</button></div></div>
+    <div class="road-col later"><h3 data-i18n="later">Later</h3><ul id="roadLater"></ul>
+      <div class="add-row"><button class="btn-add" data-add-road="later" data-i18n="addItem">+ add item</button></div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="left" id="footerLeft">VELVET SILENCE · ledger v3.0 · click any text to edit</div>
+  <div class="actions">
+    <a id="exportBtn" data-i18n="exportData">export json</a>
+    <a id="importBtn" data-i18n="importData">import json</a>
+    <a id="resetBtn" class="danger" data-i18n="resetAll">reset to defaults</a>
+  </div>
+</footer>
+
+<input type="file" id="importFile" style="display:none" accept=".json">
+<div class="toast-container" id="toastBox"></div>
+
+</div>
+
+<script>
+// ============ I18N ============
+const I18N = {
+  en: {
+    titleSuffix: "Production Ledger", subhead: "Velvet Silence · solo dev · Ren'Py + VaM · RU/EN",
+    currentSprint: "Current Sprint", sprintSpec: "/ active",
+    milestones: "Milestones", milestonesSpec: "/ 10 acts · MVP = Act 0",
+    roadmap: "Roadmap", roadmapSpec: "/ now · next · later",
+    now: "Now", next: "Next", later: "Later",
+    progress: "Progress", wip: "Fatigue · WIP", lastCommit: "Last commit",
+    addTask: "+ add task", addMilestone: "+ add milestone", addItem: "+ add item",
+    exportData: "export json", importData: "import json", resetAll: "reset to defaults",
+    editDates: "[edit dates]", footerLeft: "VELVET SILENCE · ledger v3.0 · click any text to edit",
+    endsIn: "ends in", overdue: "overdue", endsToday: "ends today", day: "day", days: "days",
+    newTask: "New task", newItem: "New item", newMilestoneAct: "Act N", newMilestoneName: "Milestone name",
+    confirmReset: "Reset ALL data to defaults? This cannot be undone (unless you exported a backup).",
+    sprintStartLabel: "Start date (YYYY-MM-DD):", sprintEndLabel: "End date (YYYY-MM-DD):",
+    importError: "Invalid JSON file or wrong format.",
+    ascent: "The Ascent", tierLabel: "Current Tier",
+    marksToNext: "Marks to next tier", totalMarks: "Total marks", tasksDone: "Tasks done", achUnlocked: "Achievements",
+    toastAchUnlocked: "Achievement unlocked", toastTierUp: "Tier ascended",
+  },
+  ru: {
+    titleSuffix: "Производственный журнал", subhead: "Velvet Silence · соло-разработчик · Ren'Py + VaM · RU/EN",
+    currentSprint: "Текущий спринт", sprintSpec: "/ активный",
+    milestones: "Вехи", milestonesSpec: "/ 10 актов · MVP = Акт 0",
+    roadmap: "План развития", roadmapSpec: "/ сейчас · далее · позже",
+    now: "Сейчас", next: "Далее", later: "Позже",
+    progress: "Прогресс", wip: "Усталость · В работе", lastCommit: "Последний коммит",
+    addTask: "+ добавить задачу", addMilestone: "+ добавить веху", addItem: "+ добавить пункт",
+    exportData: "экспорт json", importData: "импорт json", resetAll: "сбросить к дефолту",
+    editDates: "[изм. даты]", footerLeft: "VELVET SILENCE · журнал v3.0 · кликни любой текст чтобы редактировать",
+    endsIn: "до конца", overdue: "просрочено", endsToday: "заканчивается сегодня", day: "день", days: "дн.",
+    newTask: "Новая задача", newItem: "Новый пункт", newMilestoneAct: "Акт N", newMilestoneName: "Название вехи",
+    confirmReset: "Сбросить ВСЕ данные к заводским? Отмена невозможна (если не экспортировал бэкап).",
+    sprintStartLabel: "Дата начала (ГГГГ-ММ-ДД):", sprintEndLabel: "Дата окончания (ГГГГ-ММ-ДД):",
+    importError: "Неверный JSON или формат файла.",
+    ascent: "Восхождение", tierLabel: "Текущий ранг",
+    marksToNext: "Меток до следующего ранга", totalMarks: "Всего меток", tasksDone: "Задач закрыто", achUnlocked: "Достижения",
+    toastAchUnlocked: "Достижение разблокировано", toastTierUp: "Ранг повышен",
+  },
+};
+
+// ============ XP / TIERS ============
+const XP_BY_KIND = { render: 5, script: 5, code: 4, audio: 3, ui: 3, other: 2 };
+
+const TIERS = [
+  { roman: "I",    name: { en: "Apprentice",     ru: "Ученик"             }, threshold: 0    },
+  { roman: "II",   name: { en: "Craftsman",      ru: "Ремесленник"        }, threshold: 25   },
+  { roman: "III",  name: { en: "Journeyman",     ru: "Подмастерье"        }, threshold: 75   },
+  { roman: "IV",   name: { en: "Ascendant",      ru: "Восходящий"         }, threshold: 150  },
+  { roman: "V",    name: { en: "Reader",         ru: "Чтец"               }, threshold: 250  },
+  { roman: "VI",   name: { en: "Mentalist",      ru: "Менталист"          }, threshold: 400  },
+  { roman: "VII",  name: { en: "Architect",      ru: "Зодчий"             }, threshold: 600  },
+  { roman: "VIII", name: { en: "Grand Operator", ru: "Великий Мастер"     }, threshold: 900  },
+  { roman: "IX",   name: { en: "Silent Sovereign", ru: "Безмолвный Владыка" }, threshold: 1300 },
+  { roman: "X",    name: { en: "Velvet Master",  ru: "Мастер Бархата"     }, threshold: 1800 },
+];
+
+const ACHIEVEMENTS = [
+  { id: "first_line",   symbol: "◈", xp: 5,  name: { en: "First Line",       ru: "Первая строка"      }, desc: { en: "Complete your first task.",                                 ru: "Выполни первую задачу." }, check: (s) => s.totalDone >= 1 },
+  { id: "ten",          symbol: "◇", xp: 15, name: { en: "Tenfold",          ru: "Десятерица"         }, desc: { en: "Complete 10 tasks in total.",                                ru: "Выполни 10 задач в сумме." }, check: (s) => s.totalDone >= 10 },
+  { id: "fifty",        symbol: "◆", xp: 30, name: { en: "Half a Hundred",   ru: "Полста"             }, desc: { en: "Complete 50 tasks in total.",                                ru: "Выполни 50 задач в сумме." }, check: (s) => s.totalDone >= 50 },
+  { id: "century",      symbol: "◉", xp: 50, name: { en: "Century",          ru: "Сотня"              }, desc: { en: "Complete 100 tasks in total.",                               ru: "Выполни 100 задач в сумме." }, check: (s) => s.totalDone >= 100 },
+  { id: "sprint_clear", symbol: "✦", xp: 25, name: { en: "Sprinter",         ru: "Бегун"              }, desc: { en: "Clear every task in a sprint.",                              ru: "Закрой все задачи в спринте." }, check: (s) => s.sprintTotal > 0 && s.sprintDone === s.sprintTotal },
+  { id: "velvet_tongue",symbol: "❦", xp: 20, name: { en: "Velvet Tongue",    ru: "Бархатный Язык"     }, desc: { en: "Complete 20 script tasks.",                                  ru: "Выполни 20 script-задач." }, check: (s) => (s.byKind.script || 0) >= 20 },
+  { id: "framer",       symbol: "▣", xp: 20, name: { en: "The Frame",        ru: "Рамка"              }, desc: { en: "Complete 20 render tasks.",                                  ru: "Выполни 20 render-задач." }, check: (s) => (s.byKind.render || 0) >= 20 },
+  { id: "scorer",       symbol: "♪", xp: 15, name: { en: "The Score",        ru: "Партитура"          }, desc: { en: "Complete 10 audio tasks.",                                   ru: "Выполни 10 audio-задач." }, check: (s) => (s.byKind.audio || 0) >= 10 },
+  { id: "architect",    symbol: "⌘", xp: 20, name: { en: "The Architect",    ru: "Архитектор"         }, desc: { en: "Complete 20 ui/code tasks combined.",                        ru: "Выполни 20 ui/code-задач суммарно." }, check: (s) => (s.byKind.ui || 0) + (s.byKind.code || 0) >= 20 },
+  { id: "mile_first",   symbol: "◐", xp: 15, name: { en: "Ascendant",        ru: "Восходящий"         }, desc: { en: "Any milestone past 50% progress.",                           ru: "Любая веха перешла за 50% прогресса." }, check: (s) => s.milestones.some(m => m.total > 0 && m.done / m.total >= 0.5) },
+  { id: "mile_complete",symbol: "●", xp: 50, name: { en: "First Complete",   ru: "Первое Завершение"  }, desc: { en: "Complete a milestone (done == total).",                       ru: "Закрой веху (done == total)." }, check: (s) => s.milestones.some(m => m.total > 0 && m.done >= m.total) },
+  { id: "worldsmith",   symbol: "✧", xp: 40, name: { en: "Worldsmith",       ru: "Миростроитель"      }, desc: { en: "Start progress on every milestone.",                         ru: "Начать работу над каждой вехой." }, check: (s) => s.milestones.length > 0 && s.milestones.every(m => m.done > 0) },
+];
+
+// ============ DEFAULT DATA ============
+const DEFAULT_DATA = {
+  sprint: {
+    name: { en: "Sprint 02 — UI Polish", ru: "Спринт 02 — Полировка UI" },
+    start: "2026-04-14", end: "2026-04-28",
+    tasks: [
+      { id: "s2-01", kind: "ui",     done: true,  label: { en: "Quick-menu — clean text-only labels (no icons overlap)", ru: "Quick-menu — чистые текстовые подписи (без наложения иконок)" } },
+      { id: "s2-02", kind: "ui",     done: true,  label: { en: "Slider — 16px fill + 20px diamond thumb",                ru: "Слайдер — 16px заливка + 20px ромб-ползунок" } },
+      { id: "s2-03", kind: "ui",     done: true,  label: { en: "Slider — bigger hit area 32px with thin visible bar",    ru: "Слайдер — увеличенная hit-зона 32px, тонкая видимая полоса" } },
+      { id: "s2-04", kind: "ui",     done: true,  label: { en: "Mentalist history screen — replace default game_menu wrapper", ru: "Экран истории — заменить дефолтный game_menu wrapper" } },
+      { id: "s2-05", kind: "ui",     done: true,  label: { en: "Text — bloom on hover via matching outlines",             ru: "Текст — bloom при hover через matching outlines" } },
+      { id: "s2-06", kind: "script", done: false, label: { en: "Claire demo — playthrough pass, balance fatigue/affection", ru: "Демо с Клэр — прогон, баланс усталости/расположения" } },
+      { id: "s2-07", kind: "render", done: false, label: { en: "Claire — 1 bg (cafe/street) + 3 expressions",             ru: "Клэр — 1 фон (кафе/улица) + 3 выражения лица" } },
+      { id: "s2-08", kind: "audio",  done: false, label: { en: "Main theme — Suno Pro, dark cinematic, 2:00, loopable",   ru: "Главная тема — Suno Pro, тёмный cinematic, 2:00, loopable" } },
+      { id: "s2-09", kind: "code",   done: false, label: { en: "Character() defines for 12 LI + Price",                   ru: "Character() для 12 LI + Прайса — цвета/voice-теги" } },
+      { id: "s2-10", kind: "script", done: false, label: { en: "Act 0 Scene 1 — Price morning + first encounter (EN)",    ru: "Акт 0 Сцена 1 — утро Прайса + первая встреча (EN)" } },
+    ],
+  },
+  milestones: [
+    { act: { en: "Act 0",  ru: "Акт 0"  }, name: { en: "Prologue — first encounter",     ru: "Пролог — первая встреча"       }, total: 20, done: 5 },
+    { act: { en: "Act 1",  ru: "Акт 1"  }, name: { en: "First Meetings (Claire · Ruby)", ru: "Первые встречи (Клэр · Руби)"   }, total: 40, done: 0 },
+    { act: { en: "Act 2",  ru: "Акт 2"  }, name: { en: "Deeper Waters (Evelyn · Mia)",   ru: "Глубже (Эвелин · Мия)"          }, total: 40, done: 0 },
+    { act: { en: "Act 3",  ru: "Акт 3"  }, name: { en: "Crosslines (Rayna · Celine)",    ru: "Пересечения (Райна · Селин)"    }, total: 40, done: 0 },
+    { act: { en: "Act 4",  ru: "Акт 4"  }, name: { en: "The Reading (Nora · Adriana)",   ru: "Чтение (Нора · Адриана)"        }, total: 40, done: 0 },
+    { act: { en: "Act 5",  ru: "Акт 5"  }, name: { en: "Fractures (Victoria · Naomi)",   ru: "Трещины (Виктория · Наоми)"     }, total: 40, done: 0 },
+    { act: { en: "Act 6",  ru: "Акт 6"  }, name: { en: "Edge Cases (Vex · Sky)",         ru: "Крайние случаи (Векс · Скай)"   }, total: 40, done: 0 },
+    { act: { en: "Act 7",  ru: "Акт 7"  }, name: { en: "Confessions",                    ru: "Исповеди"                       }, total: 40, done: 0 },
+    { act: { en: "Act 8",  ru: "Акт 8"  }, name: { en: "The Choice",                     ru: "Выбор"                          }, total: 40, done: 0 },
+    { act: { en: "Act 9",  ru: "Акт 9"  }, name: { en: "Dominant Style — Routes",        ru: "Доминирующий стиль — Руты"      }, total: 60, done: 0 },
+    { act: { en: "Final",  ru: "Финал" }, name: { en: "12 endings + epilogues",          ru: "12 концовок + эпилоги"          }, total: 80, done: 0 },
+  ],
+  roadmap: {
+    now: [
+      { en: "Finish Sprint 02 — UI polish + Claire demo pass",        ru: "Закрыть Спринт 02 — полировка UI + прогон демо Клэр" },
+      { en: "Setup Suno Pro subscription — generate main theme",      ru: "Оформить Suno Pro — сгенерировать главную тему" },
+      { en: "Claire first renders (VaM, 3 expressions + 1 bg)",       ru: "Первые рендеры Клэр (VaM, 3 выражения + 1 фон)" },
+      { en: "Character() defines for all 12 LI",                      ru: "Character() для всех 12 LI" },
+    ],
+    next: [
+      { en: "Act 0 Scene 1-3 — prologue EN draft",                    ru: "Акт 0 Сцены 1-3 — EN черновик пролога" },
+      { en: "RU translation sync (translate russian)",                ru: "Синхронизация RU-перевода (translate russian)" },
+      { en: "F95Zone thread plan — dev log format",                   ru: "План треда F95Zone — формат dev-лога" },
+      { en: "Patreon page draft (Suno theme + 3 teaser renders)",     ru: "Черновик Patreon-страницы (тема Suno + 3 тизер-рендера)" },
+      { en: "First Steam wishlist signal — store page mockup",        ru: "Первый сигнал Steam wishlist — мокап store page" },
+    ],
+    later: [
+      { en: "10 acts full scenario — EN writing",                     ru: "10 актов полный сценарий — EN написание" },
+      { en: "~150 VaM renders (bg + char expressions)",               ru: "~150 рендеров VaM (фоны + выражения)" },
+      { en: "~25 BGM tracks via Suno",                                ru: "~25 BGM треков через Suno" },
+      { en: "SFX pass — freesound + ElevenLabs",                      ru: "SFX-проход — freesound + ElevenLabs" },
+      { en: "EN → RU localization full pass + MQM QA",                ru: "Полная локализация EN → RU + MQM QA" },
+      { en: "Playtest round 1 — 5-10 beta testers",                   ru: "Плейтест раунд 1 — 5-10 бета-тестеров" },
+      { en: "Steam store page final + EA submission",                 ru: "Финал Steam store page + EA подача" },
+      { en: "Launch strategy — Patreon tiers + F95 release",          ru: "Стратегия запуска — Patreon tiers + F95 релиз" },
+    ],
+  },
+  lastCommit: "ff1c3f1 · style: preferences/screens polish",
+  rpg: { xp: 0, totalDone: 0, unlocked: [], sprintsFinished: 0 },
+};
+
+// ============ STATE ============
+const KEY_DATA = "mentalist_planner_data_v3";
+const KEY_LANG = "mentalist_planner_lang";
+let DATA, LANG;
+
+function loadState() {
+  const saved = localStorage.getItem(KEY_DATA);
+  try { DATA = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+  catch(e) { DATA = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+  if (!DATA.rpg) DATA.rpg = { xp: 0, totalDone: 0, unlocked: [], sprintsFinished: 0 };
+  LANG = localStorage.getItem(KEY_LANG) || "ru";
+}
+function save() { localStorage.setItem(KEY_DATA, JSON.stringify(DATA)); }
+function saveLang() { localStorage.setItem(KEY_LANG, LANG); }
+
+// ============ HELPERS ============
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, "0");
+const t = (key) => I18N[LANG][key] || key;
+const loc = (obj) => (obj && typeof obj === "object" && "en" in obj) ? (obj[LANG] || obj.en || "") : (obj || "");
+const makeLocField = (text) => ({ en: text, ru: text });
+const newId = (prefix) => prefix + "-" + Math.random().toString(36).slice(2, 8);
+
+function makeEditable(el, getValue, setValue) {
+  el.addEventListener("click", (e) => {
+    if (el.classList.contains("editing")) return;
+    const current = getValue();
+    const input = document.createElement("input");
+    input.className = "inline-input";
+    input.value = current;
+    el.classList.add("editing");
+    el.textContent = "";
+    el.appendChild(input);
+    input.focus(); input.select();
+    const commit = () => {
+      const val = input.value.trim();
+      setValue(val || current);
+      el.classList.remove("editing");
+      save(); renderAll();
+    };
+    const cancel = () => { el.classList.remove("editing"); renderAll(); };
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") { ev.preventDefault(); input.blur(); }
+      if (ev.key === "Escape") { input.value = current; cancel(); }
+    });
+  });
+}
+
+// ============ RPG ============
+function computeStats() {
+  const tasks = DATA.sprint.tasks;
+  const sprintDone = tasks.filter(x => x.done).length;
+  const sprintTotal = tasks.length;
+  const byKind = {};
+  tasks.filter(x => x.done).forEach(x => byKind[x.kind] = (byKind[x.kind] || 0) + 1);
+  return {
+    totalDone: DATA.rpg.totalDone,
+    sprintDone, sprintTotal, byKind,
+    milestones: DATA.milestones,
+    xp: DATA.rpg.xp,
+    unlocked: DATA.rpg.unlocked,
+  };
+}
+function currentTier(xp) {
+  let tier = TIERS[0], next = TIERS[1];
+  for (let i = 0; i < TIERS.length; i++) {
+    if (xp >= TIERS[i].threshold) { tier = TIERS[i]; next = TIERS[i+1] || null; }
+  }
+  return { tier, next };
+}
+function checkAchievements() {
+  const stats = computeStats();
+  const newly = [];
+  ACHIEVEMENTS.forEach(a => {
+    if (DATA.rpg.unlocked.includes(a.id)) return;
+    if (a.check(stats)) {
+      DATA.rpg.unlocked.push(a.id);
+      DATA.rpg.xp += a.xp;
+      newly.push(a);
+    }
+  });
+  return newly;
+}
+function onTaskToggled(task) {
+  if (task.done) {
+    DATA.rpg.xp += XP_BY_KIND[task.kind] || 2;
+    DATA.rpg.totalDone += 1;
+  } else {
+    DATA.rpg.xp = Math.max(0, DATA.rpg.xp - (XP_BY_KIND[task.kind] || 2));
+    DATA.rpg.totalDone = Math.max(0, DATA.rpg.totalDone - 1);
+  }
+  const tierBefore = currentTier(DATA.rpg.xp - (task.done ? 1 : -1)).tier.roman;
+  const tierAfter  = currentTier(DATA.rpg.xp).tier.roman;
+  const newAchievements = checkAchievements();
+  save();
+  newAchievements.forEach(a => toast(t("toastAchUnlocked"), loc(a.name), loc(a.desc), a.symbol));
+  if (tierBefore !== tierAfter && task.done) {
+    const tc = currentTier(DATA.rpg.xp).tier;
+    toast(t("toastTierUp"), `${tc.roman} · ${loc(tc.name)}`, "", "✶");
+  }
+}
+
+function toast(label, title, desc, symbol) {
+  const box = $("toastBox");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<div class="toast-label">${label}</div>
+                  <div class="toast-title">${symbol ? symbol + " " : ""}${title}</div>
+                  ${desc ? `<div class="toast-desc">${desc}</div>` : ""}`;
+  box.appendChild(el);
+  setTimeout(() => { el.style.transition = "opacity 400ms, transform 400ms"; el.style.opacity = "0"; el.style.transform = "translateX(40px)"; }, 4000);
+  setTimeout(() => el.remove(), 4500);
+}
+
+// ============ RENDER ============
+function renderI18n() {
+  document.documentElement.setAttribute("lang", LANG);
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.getAttribute("data-i18n")); });
+  document.querySelectorAll(".lang-switch button").forEach(b => b.classList.toggle("active", b.getAttribute("data-lang") === LANG));
+  $("footerLeft").textContent = t("footerLeft");
+  $("editDates").textContent = t("editDates");
+}
+function renderHeader() {
+  const now = new Date();
+  const months = LANG === "ru"
+    ? ["ЯНВ","ФЕВ","МАР","АПР","МАЙ","ИЮН","ИЮЛ","АВГ","СЕН","ОКТ","НОЯ","ДЕК"]
+    : ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const days = LANG === "ru" ? ["ВС","ПН","ВТ","СР","ЧТ","ПТ","СБ"] : ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+  $("today").textContent = `${pad(now.getDate())} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const start = new Date(now.getFullYear(), 0, 1);
+  const week = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
+  $("weeknum").textContent = `W${pad(week)} · ${days[now.getDay()]}`;
+}
+function renderSprint() {
+  $("sprintName").textContent = loc(DATA.sprint.name);
+  $("sprintRange").textContent = `${DATA.sprint.start} → ${DATA.sprint.end}`;
+  const end = new Date(DATA.sprint.end);
+  const diff = Math.ceil((end - new Date()) / 86400000);
+  const el = $("sprintCountdown"); el.classList.remove("crit");
+  if (diff > 0) el.textContent = `${t("endsIn")} ${diff} ${diff === 1 ? t("day") : t("days")}`;
+  else if (diff === 0) el.textContent = t("endsToday");
+  else { el.textContent = `${t("overdue")} ${-diff} ${-diff === 1 ? t("day") : t("days")}`; el.classList.add("crit"); }
+
+  const list = $("taskList"); list.innerHTML = "";
+  DATA.sprint.tasks.forEach((task, idx) => {
+    const li = document.createElement("li");
+    li.className = "task" + (task.done ? " done" : "");
+
+    const chk = document.createElement("span"); chk.className = "chk";
+    chk.addEventListener("click", () => { task.done = !task.done; onTaskToggled(task); renderAll(); });
+
+    const labelEl = document.createElement("span"); labelEl.className = "label";
+    labelEl.textContent = loc(task.label);
+    makeEditable(labelEl, () => loc(task.label), (v) => { task.label[LANG] = v; });
+
+    const tagEl = document.createElement("span"); tagEl.className = "tag"; tagEl.setAttribute("data-kind", task.kind);
+    tagEl.textContent = task.kind + " ▾";
+    tagEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeAllMenus();
+      const menu = document.createElement("div"); menu.className = "kind-menu";
+      ["ui","code","script","render","audio","other"].forEach(k => {
+        const opt = document.createElement("div"); opt.className = "kind-opt"; opt.setAttribute("data-kind", k); opt.textContent = k;
+        opt.addEventListener("mousedown", (ev) => {
+          ev.preventDefault(); ev.stopPropagation();
+          task.kind = k; save(); renderAll();
+        });
+        menu.appendChild(opt);
+      });
+      tagEl.appendChild(menu);
+    });
+
+    const del = document.createElement("span"); del.className = "del"; del.textContent = "×";
+    del.addEventListener("click", (e) => { e.stopPropagation(); DATA.sprint.tasks.splice(idx, 1); save(); renderAll(); });
+
+    li.append(chk, labelEl, tagEl, del);
+    list.appendChild(li);
+  });
+
+  const done = DATA.sprint.tasks.filter(x => x.done).length;
+  const total = DATA.sprint.tasks.length;
+  $("sprintDone").textContent = done; $("sprintTotal").textContent = total;
+  $("wipCount").textContent = total - done;
+  $("sprintBar").style.width = (total ? done/total*100 : 0) + "%";
+  $("wipBar").style.width = (total ? (total-done)/total*100 : 0) + "%";
+  $("lastCommit").textContent = DATA.lastCommit;
+}
+
+function renderRpg() {
+  const { tier, next } = currentTier(DATA.rpg.xp);
+  $("tierRoman").textContent = tier.roman;
+  $("tierName").textContent = loc(tier.name);
+  if (next) {
+    const base = tier.threshold;
+    const span = next.threshold - base;
+    const gained = DATA.rpg.xp - base;
+    const pct = Math.min(100, Math.max(0, (gained / span) * 100));
+    $("tierBar").style.width = pct + "%";
+    $("tierXpCurrent").textContent = DATA.rpg.xp;
+    $("tierXpNext").textContent = next.threshold;
+  } else {
+    $("tierBar").style.width = "100%";
+    $("tierXpCurrent").textContent = DATA.rpg.xp;
+    $("tierXpNext").textContent = "MAX";
+  }
+  $("statMarks").textContent = DATA.rpg.xp;
+  $("statDone").textContent = DATA.rpg.totalDone;
+  $("statAch").textContent = `${DATA.rpg.unlocked.length}/${ACHIEVEMENTS.length}`;
+
+  const grid = $("achGrid"); grid.innerHTML = "";
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = DATA.rpg.unlocked.includes(a.id);
+    const card = document.createElement("div");
+    card.className = "ach" + (unlocked ? " unlocked" : "");
+    card.innerHTML = `
+      <div class="ach-symbol">${a.symbol}</div>
+      <div class="ach-name">${loc(a.name)}</div>
+      <div class="ach-desc">${loc(a.desc)}</div>
+      <div class="ach-xp">+${a.xp}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderMilestones() {
+  const box = $("milestones"); box.innerHTML = "";
+  DATA.milestones.forEach((m, idx) => {
+    const pct = m.total ? Math.round(m.done/m.total*100) : 0;
+    const row = document.createElement("div"); row.className = "milestone";
+    const actEl = document.createElement("div"); actEl.className = "act"; actEl.textContent = loc(m.act);
+    makeEditable(actEl, () => loc(m.act), (v) => { m.act[LANG] = v; });
+    const nameEl = document.createElement("div"); nameEl.className = "name"; nameEl.textContent = loc(m.name);
+    makeEditable(nameEl, () => loc(m.name), (v) => { m.name[LANG] = v; });
+    const doneInp = document.createElement("input"); doneInp.className = "done-input"; doneInp.type = "number"; doneInp.value = m.done; doneInp.min = 0;
+    doneInp.addEventListener("change", () => { m.done = Math.max(0, parseInt(doneInp.value) || 0); checkAchievements(); save(); renderAll(); });
+    const totalInp = document.createElement("input"); totalInp.className = "total-input"; totalInp.type = "number"; totalInp.value = m.total; totalInp.min = 1;
+    totalInp.addEventListener("change", () => { m.total = Math.max(1, parseInt(totalInp.value) || 1); checkAchievements(); save(); renderAll(); });
+    const pctEl = document.createElement("div"); pctEl.className = "pct"; pctEl.textContent = pct + "%";
+    const ratioEl = document.createElement("div"); ratioEl.className = "ratio"; ratioEl.textContent = `${m.done}/${m.total}`;
+    const del = document.createElement("div"); del.className = "del"; del.textContent = "×";
+    del.addEventListener("click", () => { if (confirm("Delete milestone?")) { DATA.milestones.splice(idx, 1); save(); renderAll(); } });
+    row.append(actEl, nameEl, doneInp, totalInp, pctEl, ratioEl, del);
+    box.appendChild(row);
+  });
+}
+function renderRoadmap() {
+  ["now","next","later"].forEach(key => {
+    const ul = $("road" + key.charAt(0).toUpperCase() + key.slice(1));
+    ul.innerHTML = "";
+    DATA.roadmap[key].forEach((item, idx) => {
+      const li = document.createElement("li"); li.className = "road-item";
+      const text = document.createElement("span"); text.className = "text"; text.textContent = loc(item);
+      makeEditable(text, () => loc(item), (v) => { item[LANG] = v; });
+      const del = document.createElement("span"); del.className = "del-road"; del.textContent = "×";
+      del.addEventListener("click", () => { DATA.roadmap[key].splice(idx, 1); save(); renderRoadmap(); });
+      li.append(text, del); ul.appendChild(li);
+    });
+  });
+}
+function renderAll() { renderI18n(); renderHeader(); renderSprint(); renderRpg(); renderMilestones(); renderRoadmap(); }
+
+function closeAllMenus() { document.querySelectorAll(".kind-menu").forEach(m => m.remove()); }
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".kind-menu") && !e.target.classList.contains("tag")) closeAllMenus();
+});
+
+// ============ ACTIONS ============
+document.querySelectorAll(".lang-switch button").forEach(b => {
+  b.addEventListener("click", () => { LANG = b.getAttribute("data-lang"); saveLang(); renderAll(); });
+});
+makeEditable($("sprintName"), () => loc(DATA.sprint.name), (v) => { DATA.sprint.name[LANG] = v; });
+makeEditable($("lastCommit"), () => DATA.lastCommit, (v) => { DATA.lastCommit = v; });
+$("editDates").addEventListener("click", () => {
+  const s = prompt(t("sprintStartLabel"), DATA.sprint.start); if (s === null) return;
+  const e = prompt(t("sprintEndLabel"), DATA.sprint.end); if (e === null) return;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) DATA.sprint.start = s;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(e)) DATA.sprint.end = e;
+  save(); renderSprint();
+});
+$("addTaskBtn").addEventListener("click", () => {
+  DATA.sprint.tasks.push({ id: newId("t"), kind: "other", done: false, label: makeLocField(t("newTask")) });
+  save(); renderSprint();
+});
+$("addMilestoneBtn").addEventListener("click", () => {
+  DATA.milestones.push({ act: makeLocField(t("newMilestoneAct")), name: makeLocField(t("newMilestoneName")), total: 10, done: 0 });
+  save(); renderMilestones();
+});
+document.querySelectorAll("[data-add-road]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    DATA.roadmap[btn.getAttribute("data-add-road")].push(makeLocField(t("newItem")));
+    save(); renderRoadmap();
+  });
+});
+$("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `mentalist-planner-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+});
+$("importBtn").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!parsed.sprint || !parsed.milestones || !parsed.roadmap) throw new Error("bad format");
+      DATA = parsed;
+      if (!DATA.rpg) DATA.rpg = { xp: 0, totalDone: 0, unlocked: [], sprintsFinished: 0 };
+      save(); renderAll();
+    } catch(err) { alert(t("importError")); }
+  };
+  reader.readAsText(file); e.target.value = "";
+});
+$("resetBtn").addEventListener("click", () => {
+  if (confirm(t("confirmReset"))) { DATA = JSON.parse(JSON.stringify(DEFAULT_DATA)); save(); renderAll(); }
+});
+
+// ============ INIT ============
+loadState();
+renderAll();
+checkAchievements();  // в случае если данные уже достаточны — разблокируем без toast
+save();
+renderRpg();
+setInterval(() => { renderHeader(); renderSprint(); }, 60000);
+
+// ============ PWA Service Worker ============
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((err) => {
+      console.warn("SW register failed:", err);
+    });
+  });
+}
+</script>
+</body>
+</html>
